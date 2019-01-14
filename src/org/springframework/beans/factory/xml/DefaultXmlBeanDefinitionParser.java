@@ -134,6 +134,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		this.resource = resource;
 
 		logger.debug("Loading bean definitions");
+		//获取根元素beans
 		Element root = doc.getDocumentElement();
 
 		this.defaultLazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
@@ -145,6 +146,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 		NodeList nl = root.getChildNodes();
 		int beanDefinitionCounter = 0;
+		//获取bean元素
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && BEAN_ELEMENT.equals(node.getNodeName())) {
@@ -179,9 +181,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse an element definition: We know this is a BEAN element.
 	 * Bean elements specify their canonical name as id attribute
-	 * and their aliases as a delimited name attribute.
-	 * If no id specified, use the first name in the name attribute as
-	 * canonical name, registering all others as aliases.
+	 * 	 * and their aliases as a delimited name attribute.
+	 * 	 * If no id specified, use the first name in the name attribute as
+	 * 	 * canonical name, registering all others as aliases.
 	 */
 	protected void loadBeanDefinition(Element ele) {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
@@ -197,6 +199,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			logger.debug("No XML 'id' specified - using '" + id + "' as ID and " + aliases + " as aliases");
 		}
 
+		//BeanDefinition用来描述xml中的bean
 		AbstractBeanDefinition beanDefinition = parseBeanDefinition(ele, id);
 
 		if (id == null || "".equals(id)) {
@@ -211,6 +214,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 
 		logger.debug("Registering bean definition with id '" + id + "'");
+
+		//解析完的BeanDefinition存放到beanFactory中.
 		this.beanFactory.registerBeanDefinition(id, beanDefinition);
 		for (Iterator it = aliases.iterator(); it.hasNext();) {
 			this.beanFactory.registerAlias(id, (String) it.next());
@@ -223,9 +228,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	protected AbstractBeanDefinition parseBeanDefinition(Element ele, String beanName) {
 		String className = null;
 		try {
+			//class="com.xxx.Bean"
 			if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
 				className = ele.getAttribute(CLASS_ATTRIBUTE);
 			}
+			//parent="com.xxx.ParentBean"
 			String parent = null;
 			if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
 				parent = ele.getAttribute(PARENT_ATTRIBUTE);
@@ -234,6 +241,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				throw new BeanDefinitionStoreException(this.resource, beanName, "Either 'class' or 'parent' is required");
 			}
 
+			//获取属性描述
 			AbstractBeanDefinition bd = null;
 			MutablePropertyValues pvs = getPropertyValueSubElements(beanName, ele);
 
@@ -249,27 +257,32 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 					rbd = new RootBeanDefinition(className, cargs, pvs);
 				}
 
+				//depends-on影响初始化顺序
 				if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 					String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
 					rbd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, BEAN_NAME_DELIMITERS, true, true));
 				}
 
+				//dependency-check
 				String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
 				if (DEFAULT_VALUE.equals(dependencyCheck)) {
 					dependencyCheck = this.defaultDependencyCheck;
 				}
 				rbd.setDependencyCheck(getDependencyCheck(dependencyCheck));
 
+				//autowire
 				String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
 				if (DEFAULT_VALUE.equals(autowire)) {
 					autowire = this.defaultAutowire;
 				}
 				rbd.setAutowireMode(getAutowireMode(autowire));
 
+				//init-method
 				String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
 				if (!initMethodName.equals("")) {
 					rbd.setInitMethodName(initMethodName);
 				}
+				//destory-method
 				String destroyMethodName = ele.getAttribute(DESTROY_METHOD_ATTRIBUTE);
 				if (!destroyMethodName.equals("")) {
 					rbd.setDestroyMethodName(destroyMethodName);
@@ -281,10 +294,12 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				bd = new ChildBeanDefinition(parent, pvs);
 			}
 
+			//singleton
 			if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
 				bd.setSingleton(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)));
 			}
 
+			//lazy-init
 			String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
 			if (DEFAULT_VALUE.equals(lazyInit) && bd.isSingleton()) {
 				// just apply default to singletons, as lazy-init has no meaning for prototypes
@@ -315,6 +330,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
+			//获取构造参数
 			if (node instanceof Element && CONSTRUCTOR_ARG_ELEMENT.equals(node.getNodeName())) {
 				parseConstructorArgElement(beanName, cargs, (Element) node);
 			}
@@ -342,8 +358,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	protected void parseConstructorArgElement(String beanName, ConstructorArgumentValues cargs, Element ele)
 			throws DOMException, ClassNotFoundException {
+		//获取属性值
 		Object val = getPropertyValue(ele, beanName);
+		//index
 		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
+		//type
 		String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
 		if (!"".equals(indexAttr)) {
 			try {
@@ -433,6 +452,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 																								 "Either 'bean' or 'local' is required for a reference");
 				}
 			}
+			//ref=beanName
 			return new RuntimeBeanReference(beanRef);
 		}
 		else if (ele.getTagName().equals(IDREF_ELEMENT)) {
