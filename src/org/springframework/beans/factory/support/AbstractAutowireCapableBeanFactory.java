@@ -156,6 +156,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			logger.debug("Creating instance of bean '" + beanName + "' with merged definition [" + mergedBeanDefinition + "]");
 		}
 
+		//先执行依赖的bean
 		if (mergedBeanDefinition.getDependsOn() != null) {
 			for (int i = 0; i < mergedBeanDefinition.getDependsOn().length; i++) {
 				// guarantee initialization of beans that the current one depends on

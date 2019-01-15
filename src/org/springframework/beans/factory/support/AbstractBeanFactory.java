@@ -134,6 +134,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
 			}
+			/**
+			 * 判断一下是不是FactoryBean
+			 */
 			return getObjectForSharedInstance(name, sharedInstance);
 		}
 		else {
@@ -157,12 +160,14 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 					if (sharedInstance == null) {
 						logger.info("Creating shared instance of singleton bean '" + beanName + "'");
 						sharedInstance = createBean(beanName, mergedBeanDefinition);
+						//存进缓存中
 						addSingleton(beanName, sharedInstance);
 					}
 				}
 				return getObjectForSharedInstance(name, sharedInstance);
 			}
 			else {
+				//每次都是一个新对象
 				return createBean(name, mergedBeanDefinition);
 			}
 		}
