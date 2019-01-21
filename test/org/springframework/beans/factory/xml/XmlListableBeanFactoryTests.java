@@ -46,12 +46,10 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		parent = new DefaultListableBeanFactory();
 		Map m = new HashMap();
 		m.put("name", "Albert");
-		parent.registerBeanDefinition("father",
-			new RootBeanDefinition(TestBean.class, new MutablePropertyValues(m)));
+		parent.registerBeanDefinition("father",new RootBeanDefinition(TestBean.class, new MutablePropertyValues(m)));
 		m = new HashMap();
 		m.put("name", "Roderick");
-		parent.registerBeanDefinition("rod",
-			new RootBeanDefinition(TestBean.class, new MutablePropertyValues(m)));
+		parent.registerBeanDefinition("rod",new RootBeanDefinition(TestBean.class, new MutablePropertyValues(m)));
 
 		// Load from classpath, NOT a file path
 		this.factory = new XmlBeanFactory(new ClassPathResource("test.xml", getClass()), parent);

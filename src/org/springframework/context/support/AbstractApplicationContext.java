@@ -223,6 +223,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		this.startupTime = System.currentTimeMillis();
 
 		// tell subclass to refresh the internal bean factory
+		//创建beanFactory, XmlBeanDefinitionReader并调用loadBeanDefinitions
 		refreshBeanFactory();
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 
@@ -262,6 +263,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		refreshListeners();
 
 		// instantiate singletons this late to allow them to access the message source
+		// 预创建实例(非lazyInit)
 		beanFactory.preInstantiateSingletons();
 
 		// last step: publish respective event
