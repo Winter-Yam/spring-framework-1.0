@@ -109,11 +109,13 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	 * @see org.aopalliance.intercept.Invocation#proceed
 	 */
 	public Object proceed() throws Throwable {
+		//  最后一个拦截器了
 		//	We start with an index of -1 and increment early
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}
 
+		// 获取其中一个拦截器
 		Object interceptorOrInterceptionAdvice = this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
 			// Evaluate dynamic method matcher here: static part will already have
@@ -136,6 +138,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	}
 	
 	/**
+	 * 调用实际的方法
 	 * Invoke the joinpoint using reflection. Subclasses can override this to use custom
 	 * invocation.
 	 * @return the return value of the joinpoint

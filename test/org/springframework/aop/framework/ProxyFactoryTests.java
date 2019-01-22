@@ -63,6 +63,7 @@ public class ProxyFactoryTests extends TestCase {
 		Advisor advisor = new DefaultPointcutAdvisor(new CountingBeforeAdvice());
 		Advised advised = (Advised) pf.getProxy();
 		// Can use advised and ProxyFactory interchangeably
+		// 最终也是组装成advisor,然后调用addAdvisor.
 		advised.addInterceptor(nop);
 		pf.addAdvisor(advisor);
 		assertEquals(-1, pf.indexOf((Interceptor) null));

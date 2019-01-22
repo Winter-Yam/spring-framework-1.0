@@ -193,7 +193,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		}
 		
 		TargetSource targetSource = getTargetSource(bean, name);
-		
+
+		//符合该bean的拦截器
 		Object[] specificInterceptors = getInterceptorsAndAdvisorsForBean(bean, name);
 		
 		// proxy if we have advice or if a TargetSourceCreator wants to do some
@@ -201,8 +202,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		if (specificInterceptors != DO_NOT_PROXY || !(targetSource instanceof SingletonTargetSource)) {
 
 			// handle prototypes correctly
+			// 获取共同的拦截器
 			Advisor[] commonInterceptors = resolveInterceptorNames();
 
+			// 两种拦截器加一起
 			List allInterceptors = new ArrayList();
 			if (specificInterceptors != null) {
 				allInterceptors.addAll(Arrays.asList(specificInterceptors));
@@ -236,11 +239,14 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			}
 			
 			for (Iterator it = allInterceptors.iterator(); it.hasNext();) {
+				// 包装成Advisor
 				Advisor advisor = GlobalAdvisorAdapterRegistry.getInstance().wrap(it.next());
+				// 添加到工厂中
 				proxyFactory.addAdvisor(advisor);
 			}
 			proxyFactory.setTargetSource(getTargetSource(bean, name));
-			
+
+			// 创建代理，调用拦截器链.
 			return proxyFactory.getProxy();
 		}
 		else {
