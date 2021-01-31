@@ -306,12 +306,13 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * It's up to each subclass to decide whether or not it supports a request method.
-	 * It should throw a Servlet exception if it doesn't support a particular request type.
-	 * This might commonly be done with GET for forms, for example
+	 * 由每个子类决定是否支持请求方法。
+	 * 如果它不支持特定的请求类型，则应抛出Servlet异常，如果不支持，需要在doService中抛出
+	 * 例如，通常可以使用GET来完成表单
 	 */
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
+		// 抽取与doPost相同的代码块
 		serviceWrapper(request, response);
 	}
 
@@ -322,13 +323,13 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 */
 	protected final void doPost(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
+		// 抽取与doGet相同的代码块
 		serviceWrapper(request, response);
 	}
 
 	/**
-	 * Handle this request, publishing an event regardless of the outcome.
-	 * The actually event handling is performed by the abstract doService() method.
-	 * Both doGet() and doPost() are handled by this method.
+	 * 请求处理的包装方法，请求的具体处理由子类实现抽象方法doService()完成，该方法统一处理异常。
+	 * doGet（）和doPost（）均由此方法处理。
 	 */
 	private void serviceWrapper(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
@@ -336,6 +337,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		long startTime = System.currentTimeMillis();
 		Exception failureCause = null;
 		try {
+			// 由子类实现具体的
 			doService(request, response);
 		}
 		catch (ServletException ex) {
@@ -355,15 +357,19 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			throw new ServletException(ex.getMessage(), ex);
 		}
 		finally {
+			// 计算具体请求响应的具体时间
 			long processingTime = System.currentTimeMillis() - startTime;
-			// whether or not we succeeded, publish an event
+			// 无论是否成功，发布一个事件
+
 			if (failureCause != null) {
+				// 请求处理失败
 				logger.error("Could not complete request", failureCause);
 				this.webApplicationContext.publishEvent(
 				    new RequestHandledEvent(this, request.getRequestURI(), processingTime, request.getRemoteAddr(),
 				                            request.getMethod(), getServletConfig().getServletName(), failureCause));
 			}
 			else {
+				// 请求处理成功
 				logger.debug("Successfully completed request");
 				this.webApplicationContext.publishEvent(
 				    new RequestHandledEvent(this, request.getRequestURI(), processingTime, request.getRemoteAddr(),

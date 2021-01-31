@@ -65,10 +65,8 @@ public abstract class HttpServletBean extends HttpServlet {
 	}
 	
 	/**
-	 * Map config parameters onto bean properties of this servlet, and
-	 * invoke subclass initialization.
-	 * @throws ServletException if bean properties are invalid (or required
-	 * properties are missing), or if subclass initialization fails.
+	 * 将ServletConfig的配置参数映射到该servlet的bean属性上，并调用子类初始化方法。
+	 * @throws属性无效时或者子类初始化失败时抛出ServletException
 	 */
 	public final void init() throws ServletException {
 		logger.info("Initializing servlet '" + getServletName() + "'");
